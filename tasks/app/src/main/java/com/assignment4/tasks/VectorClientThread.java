@@ -20,39 +20,54 @@ public class VectorClientThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (true) {
+        while (true) {
+            try {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 clientSocket.receive(receivePacket);
                 String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-                // New code for splitting the response and filtering out timestamps
-                String[] responseMessageArray = response.replaceAll("\\p{Punct}", " ").trim().split("\\s+");
+                if (response.startsWith("history")) {
+                    System.out.println("Receiving chat history...");
+                    System.out.println(response.replaceFirst("history", "").trim());
+                } else {
+                    int delimiterIndex = response.indexOf(":");
+                    if (delimiterIndex == -1) {
+                        System.err.println("Received an invalid message format: " + response);
+                        continue; // Skip processing if the format is invalid
+                    }
 
-                // Assuming the first part of the array is the server message
-                String serverMessage = responseMessageArray[0];
+                    String serverMessage = response.substring(0, delimiterIndex).trim();
+                    String vectorClockData = response.substring(delimiterIndex + 1).trim();
 
-                // Extracting vector clock data from the response
-                String vectorClockData = ""; // Initialize an empty string for the clock data
-                for (int i = 1; i < responseMessageArray.length; i++) {
-                    vectorClockData += responseMessageArray[i] + (i < responseMessageArray.length - 1 ? "," : "");
+                    // Remove brackets and split the vector clock into key-value pairs
+                    vectorClockData = vectorClockData.replaceAll("[\\{\\}]", ""); // Remove curly brackets
+                    String[] keyValuePairs = vectorClockData.split(",");
+
+                    for (String pair : keyValuePairs) {
+                        String[] entry = pair.split("=");
+                        try {
+                            int clockIndex = Integer.parseInt(entry[0].trim());
+                            int serverTime = Integer.parseInt(entry[1].trim());
+                            vcl.setVectorClock(clockIndex, Math.max(vcl.getCurrentTimestamp(clockIndex), serverTime));
+                        } catch (NumberFormatException e) {
+                            System.err.println("Failed to parse clock value: " + pair);
+                            // Handle parse error, possibly continue to the next pair
+                        }
+                    }
+
+                    vcl.tick(id);
+                    System.out.println(serverMessage + ": " + vcl.showClock());
                 }
-
-                // Update the vector clock
-                String[] clockValues = vectorClockData.split(",");
-                for (int i = 0; i < clockValues.length; i++) {
-                    int serverTime = Integer.parseInt(clockValues[i].trim());
-                    vcl.setVectorClock(i, Math.max(vcl.getCurrentTimestamp(i), serverTime));
-                }
-
-                // Increment local clock
-                vcl.tick(id);
-
-                System.out.println("Server: " + serverMessage + " " + vcl.showClock());
+            } catch (IOException e) {
+                System.err.println("An I/O error occurred: " + e.getMessage());
+                break; // Exit the loop on IOException
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
+
+
+
+
+
 
 }

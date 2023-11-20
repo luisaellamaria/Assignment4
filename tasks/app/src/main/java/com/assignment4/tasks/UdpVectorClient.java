@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class UdpVectorClient {
@@ -53,22 +54,28 @@ public class UdpVectorClient {
             // send the message to the server
             sendData = responseMessage.getBytes();
 
-            /*
-             * write your code to send message to the server. clientSocket.send(messageTosend);
-             */
-
+            // send message to the server
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+            clientSocket.send(sendPacket);
 
             // check if the user wants to see the history
             if(messageBody.equals("history")) {
                 System.out.println("Receiving the chat history...");
                 logs = new ArrayList<>();
 
-                /*
-                 * write your code to receive the logs, clientSocket.receive(getack);
-                 * it should keep receiving till all the messages are reached.
-                 * You can use the clientSocket.setSoTimeout(timeinmiliseconds); to detect if the all the messages have been received
-                 * update the logs list
-                 */
+                // recieve chat history
+                clientSocket.setSoTimeout(5000); // Set timeout for 5 seconds
+                while (true) {
+                    try {
+                        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                        clientSocket.receive(receivePacket);
+                        String receivedMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                        logs.add(receivedMessage);
+                    } catch (IOException e) {
+                        // Timeout reached, break the loop
+                        break;
+                    }
+                }
 
                 UdpVectorClient uc = new UdpVectorClient();
                 uc.showHistory(logs); // gives out all the unsorted logs stored at the server
@@ -84,27 +91,63 @@ public class UdpVectorClient {
         }
     }
     public void showHistory(List<String> logs){
-
         // prints the unsorted logs (history) coming form the server
         for (String message : logs) {
-
             System.out.println(message);
         }
     }
-    public void showSortedHistory(List<String> logs){
 
-        // prints sorted logs (history) received
+    public void showSortedHistory(List<String> logs) {
         System.out.println("Print sorted conversation using attached vector clocks");
-        Map<int[], String> logMap = new HashMap<>();
+        Map<List<Integer>, String> logMap = new HashMap<>();
 
-        /*
-         * write your code to sort the logs (history) in ascending order
-         * to sort the logs, use the clock array, for example, [0,0,1,1] as key the to the logMap.
-         * Since this is a custom sorting, create a custom comparator to sort logs
-         * once sorted print the logs that are following the correct sequence of the message flow
-         * to store the sorted logs for printing you could use LinkedHashMap
-         */
+        // Extract vector clocks and messages
+        for (String log : logs) {
+            String[] parts = log.split(":");
+            String message = parts[0];
 
+            // Remove non-numeric characters like brackets and trim spaces
+            String clockString = parts[1].replaceAll("[\\[\\]]", "");
+            List<Integer> clock;
+            try {
+                clock = Arrays.stream(clockString.split(","))
+                        .map(String::trim)
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing vector clock: " + e.getMessage());
+                continue;
+            }
+
+            logMap.put(clock, message);
+        }
+
+        // Sort using the custom comparator
+        Comparator<List<Integer>> vectorClockComparator = new Comparator<List<Integer>>() {
+            @Override
+            public int compare(List<Integer> clock1, List<Integer> clock2) {
+                int size = Math.min(clock1.size(), clock2.size());
+                for (int i = 0; i < size; i++) {
+                    int comparison = clock1.get(i).compareTo(clock2.get(i));
+                    if (comparison != 0) {
+                        return comparison;
+                    }
+                }
+                return Integer.compare(clock1.size(), clock2.size());
+            }
+        };
+
+        List<Map.Entry<List<Integer>, String>> sortedLogs = new ArrayList<>(logMap.entrySet());
+        sortedLogs.sort(Map.Entry.comparingByKey(vectorClockComparator));
+
+        // Print sorted logs
+        for (Map.Entry<List<Integer>, String> entry : sortedLogs) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
     }
+
+
+
+
 
 }

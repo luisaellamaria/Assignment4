@@ -26,10 +26,17 @@ public class VectorClientThread implements Runnable {
                 clientSocket.receive(receivePacket);
                 String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-                // Splitting the response to get the message and vector clock
-                String[] parts = response.split(":");
-                String serverMessage = parts[0];
-                String vectorClockData = parts[1].replaceAll("\\[|\\]", "");
+                // New code for splitting the response and filtering out timestamps
+                String[] responseMessageArray = response.replaceAll("\\p{Punct}", " ").trim().split("\\s+");
+
+                // Assuming the first part of the array is the server message
+                String serverMessage = responseMessageArray[0];
+
+                // Extracting vector clock data from the response
+                String vectorClockData = ""; // Initialize an empty string for the clock data
+                for (int i = 1; i < responseMessageArray.length; i++) {
+                    vectorClockData += responseMessageArray[i] + (i < responseMessageArray.length - 1 ? "," : "");
+                }
 
                 // Update the vector clock
                 String[] clockValues = vectorClockData.split(",");

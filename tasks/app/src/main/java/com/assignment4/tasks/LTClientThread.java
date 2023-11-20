@@ -7,9 +7,9 @@ import java.net.DatagramSocket;
 public class LTClientThread implements Runnable {
 
     private final DatagramSocket clientSocket;
-    LamportTimestamp lc;
+    private LamportTimestamp lc;
 
-    byte[] receiveData = new byte[1024];
+    private byte[] receiveData = new byte[1024];
 
     public LTClientThread(DatagramSocket clientSocket, LamportTimestamp lc) {
         this.clientSocket = clientSocket;
@@ -18,16 +18,29 @@ public class LTClientThread implements Runnable {
 
     @Override
     public void run() {
-        String response = null;
-        /*
-         * write your code to continuously receive the response from the server and update the clock value with the received value
-         */
-        System.out.println("Server:" + response + ":" + lc.getCurrentTimestamp());
-        /*
-         * write your code to parse the response. Remember the response you receive is in message:timestamp format.
-         * response.split(":");
-         * update clock every time the client receives a message
-         */
+        while (true) {
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            try {
+                // Receive packet from server
+                clientSocket.receive(receivePacket);
+                String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
+                // Parse the response
+                String[] parts = response.split(":");
+                if (parts.length >= 2) {
+                    String message = parts[0];
+                    int receivedTimestamp = Integer.parseInt(parts[1]);
+
+                    // Update the Lamport clock
+                    lc.updateClock(receivedTimestamp);
+
+                    // Print the message along with the updated timestamp
+                    System.out.println("Server: " + message + " : " + lc.getCurrentTimestamp());
+                }
+            } catch (IOException e) {
+                System.err.println("IOException in client thread: " + e.getMessage());
+                break;
+            }
+        }
     }
 }

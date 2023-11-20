@@ -16,6 +16,7 @@ public class UdpVectorClient {
         Scanner id_input = new Scanner(System.in);
         int id = id_input.nextInt();
 
+
         // prepare the client socket
         DatagramSocket clientSocket = new DatagramSocket();
         InetAddress IPAddress = InetAddress.getByName("localhost");

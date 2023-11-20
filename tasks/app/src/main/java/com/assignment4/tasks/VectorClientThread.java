@@ -20,15 +20,32 @@ public class VectorClientThread implements Runnable {
 
     @Override
     public void run() {
-        String response = "example:[1,1.0.0]"; //update this with the real response string from server
-        /*
-         * Write your code to receive messgaes from the server and update the vector clock
-         */
-        String[] responseMessageArray = response.split(":");
-        /*
-         * you could use "replaceAll("\\p{Punct}", " ").trim().split("\\s+");" for filteing the received message timestamps
-         * update clock and increament local clock (tick) for receiving the message
-         */
-        System.out.println("Server:" +responseMessageArray[0] +" "+ vcl.showClock());
+        try {
+            while (true) {
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                clientSocket.receive(receivePacket);
+                String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+                // Splitting the response to get the message and vector clock
+                String[] parts = response.split(":");
+                String serverMessage = parts[0];
+                String vectorClockData = parts[1].replaceAll("\\[|\\]", "");
+
+                // Update the vector clock
+                String[] clockValues = vectorClockData.split(",");
+                for (int i = 0; i < clockValues.length; i++) {
+                    int serverTime = Integer.parseInt(clockValues[i].trim());
+                    vcl.setVectorClock(i, Math.max(vcl.getCurrentTimestamp(i), serverTime));
+                }
+
+                // Increment local clock
+                vcl.tick(id);
+
+                System.out.println("Server: " + serverMessage + " " + vcl.showClock());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 }

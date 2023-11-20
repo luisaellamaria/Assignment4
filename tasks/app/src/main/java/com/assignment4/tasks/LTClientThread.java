@@ -31,7 +31,7 @@ public class LTClientThread implements Runnable {
                     String message = parts[0];
                     int receivedTimestamp = Integer.parseInt(parts[1]);
 
-                    // Update the Lamport clock
+                    // Update the Lamport clock (only if the received timestamp is greater than the clock value for the client)
                     lc.updateClock(receivedTimestamp);
 
                     // Print the message along with the updated timestamp

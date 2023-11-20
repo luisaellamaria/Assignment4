@@ -49,6 +49,12 @@ public class UdpLTClient {
                 /*
                  * write your code to send the message to the server
                  */
+                sendData = responseMessage.getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+                clientSocket.send(sendPacket);
+
+                // update the clock
+                lc.updateClock(messageTime);
 
 
 

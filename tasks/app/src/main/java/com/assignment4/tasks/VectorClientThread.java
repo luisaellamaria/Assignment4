@@ -30,20 +30,23 @@ public class VectorClientThread implements Runnable {
 
                 String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-                // Parse the response
-                String[] responseMessageArray = response.split(":");
+                String[] responseMessageArray = response.split(":"); // split the message into two parts
+
+                // check if the message is in the correct format
                 if (responseMessageArray.length < 2) {
                     System.err.println("Invalid response format.");
-                    continue; // Skip this iteration on format error
+                    continue;
                 }
 
+                // extract the message and the vector clock
                 String responseMessage = responseMessageArray[0];
                 String clockString = responseMessageArray[1].trim();
 
-                // Extract vector clock entries
+                // extract vector clock entries
                 Pattern p = Pattern.compile("(\\d+)=(\\d+)");
                 Matcher m = p.matcher(clockString);
 
+                // parse the vector clock
                 while (m.find()) {
                     int index = Integer.parseInt(m.group(1));
                     int value = Integer.parseInt(m.group(2));
@@ -52,7 +55,7 @@ public class VectorClientThread implements Runnable {
                     }
                 }
 
-                // Update and increment the client's vector clock
+                // update and increment the client's vector clock
                 vcl.tick(id);
 
                 System.out.println("Server: " + responseMessage + " : " + vcl.showClock());

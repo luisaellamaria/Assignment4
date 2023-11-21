@@ -21,20 +21,20 @@ public class LTClientThread implements Runnable {
         while (true) {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             try {
-                // Receive packet from server
+                // receive packet from server
                 clientSocket.receive(receivePacket);
                 String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-                // Parse the response
+                // parse the response
                 String[] parts = response.split(":");
                 if (parts.length >= 2) {
                     String message = parts[0];
                     int receivedTimestamp = Integer.parseInt(parts[1]);
 
-                    // Update the Lamport clock (only if the received timestamp is greater than the clock value for the client)
+                    // update the Lamport clock (only if the received timestamp is greater than the clock value for the client)
                     lc.updateClock(receivedTimestamp);
 
-                    // Print the message along with the updated timestamp
+                    // print the message along with the updated timestamp
                     System.out.println("Server: " + message + " : " + lc.getCurrentTimestamp());
                 }
             } catch (IOException e) {

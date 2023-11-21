@@ -16,7 +16,6 @@ public class UdpVectorClient {
         Scanner id_input = new Scanner(System.in);
         int id = id_input.nextInt();
 
-
         // prepare the client socket
         DatagramSocket clientSocket = new DatagramSocket();
         InetAddress IPAddress = InetAddress.getByName("localhost");
@@ -98,11 +97,11 @@ public class UdpVectorClient {
     }
 
     public void showSortedHistory(List<String> logs) {
-        //prints sorted logs (history) received
+        // prints sorted logs (history) received
         System.out.println("Print sorted conversation using attached vector clocks");
         Map<List<Integer>, String> logMap = new HashMap<>();
 
-        // Extract vector clocks and messages
+        // extract vector clocks and messages (note: we needed the help of chatgpt to program this part as we faced some issues with sorting the history
         for (String log : logs) {
             String[] parts = log.split(":");
             String message = parts[0];
@@ -120,7 +119,7 @@ public class UdpVectorClient {
             logMap.put(clock, message);
         }
 
-        // sort the logs in ascending order using the custom comparator
+        // sort the logs in ascending order (note: we needed the help of chatgpt to program this part as we faced some issues with sorting the history)
         Comparator<List<Integer>> vectorClockComparator = new Comparator<List<Integer>>() {
             @Override
             public int compare(List<Integer> clock1, List<Integer> clock2) {

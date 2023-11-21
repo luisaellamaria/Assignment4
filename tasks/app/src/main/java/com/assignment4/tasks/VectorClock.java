@@ -31,7 +31,7 @@ public class VectorClock {
     }
 
     public int getSize() {
-        return timestamps.length; // Returns the size of the vector clock
+        return timestamps.length; // returns the size of the vector clock
     }
 
     public String showClock() {

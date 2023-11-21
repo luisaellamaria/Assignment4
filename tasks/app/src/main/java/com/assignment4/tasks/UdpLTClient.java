@@ -32,13 +32,13 @@ public class UdpLTClient {
 
 
         while(true) {
+                String messageBody = input.nextLine(); // get the message from the user
+                int messageTime = lc.getCurrentTimestamp(); // get the current timestamp
 
-                String messageBody = input.nextLine();
-                int messageTime = lc.getCurrentTimestamp();
+                // prepare the message to be sent to the server
                 String responseMessage = messageBody + ':' + messageTime;
 
-
-                lc.tick();
+                lc.tick(); // increment the clock
 
                 // check if the user wants to quit
                 if(messageBody.equalsIgnoreCase("quit")){
@@ -46,9 +46,7 @@ public class UdpLTClient {
                     System.exit(1);
                 }
 
-                /*
-                 * write your code to send the message to the server
-                 */
+                // send the message to the server
                 sendData = responseMessage.getBytes();
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
                 clientSocket.send(sendPacket);
@@ -56,18 +54,10 @@ public class UdpLTClient {
                 // update the clock
                 lc.updateClock(messageTime);
 
-
-
-
-
-
-
                 LTClientThread client;
                 client = new LTClientThread(clientSocket, lc);
                 Thread receiverThread = new Thread(client);
                 receiverThread.start();
-
         }
-
     }
 }

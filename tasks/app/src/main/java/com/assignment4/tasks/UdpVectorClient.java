@@ -62,7 +62,7 @@ public class UdpVectorClient {
                 System.out.println("Receiving the chat history...");
                 logs = new ArrayList<>();
 
-                clientSocket.setSoTimeout(5000); // Set timeout for 5 seconds
+                clientSocket.setSoTimeout(8000); // Set timeout for 5 seconds
 
                 while (true) {
                     try {
@@ -74,6 +74,7 @@ public class UdpVectorClient {
                         break; // break the loop when the timeout is reached
                     }
                 }
+
                 UdpVectorClient uc = new UdpVectorClient();
                 uc.showHistory(logs); // gives out all the unsorted logs stored at the server
                 uc.showSortedHistory(logs); // shows sorted logs
@@ -97,7 +98,7 @@ public class UdpVectorClient {
     }
 
     public void showSortedHistory(List<String> logs) {
-        //prints sorted logs (history) recieved
+        //prints sorted logs (history) received
         System.out.println("Print sorted conversation using attached vector clocks");
         Map<List<Integer>, String> logMap = new HashMap<>();
 
@@ -138,6 +139,7 @@ public class UdpVectorClient {
         sortedLogs.sort(Map.Entry.comparingByKey(vectorClockComparator));
 
         // print sorted logs
+        System.out.println("Sorted logs:");
         for (Map.Entry<List<Integer>, String> entry : sortedLogs) {
             System.out.println(entry.getKey() + " " + entry.getValue());
         }

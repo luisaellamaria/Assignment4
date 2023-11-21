@@ -29,13 +29,6 @@ public class VectorClientThread implements Runnable {
 
                 String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-                System.out.println(response);
-                // check if the user wants to see the history and send the messages continuously
-                if (response.startsWith("history")) {
-                    System.out.println("Receiving chat history...");
-                    System.out.println(response.replaceFirst("history", "").trim());
-                }
-
                 // Parse the response
                 String[] responseMessageArray = response.split(":");
                 if (responseMessageArray.length < 2) {

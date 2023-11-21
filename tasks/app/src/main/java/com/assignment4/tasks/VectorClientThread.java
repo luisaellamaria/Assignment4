@@ -20,6 +20,7 @@ public class VectorClientThread implements Runnable {
         this.id = id;
     }
 
+
     @Override
     public void run() {
         try {

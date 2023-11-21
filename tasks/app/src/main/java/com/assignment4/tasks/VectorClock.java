@@ -16,7 +16,7 @@ public class VectorClock {
     }
 
     public void tick(int processId) {
-        timestamps[processId]++; // Increment the clock for the given process id
+        timestamps[processId]++; // increment the clock for the given process id
     }
 
     public int getCurrentTimestamp(int processId) {
@@ -24,9 +24,14 @@ public class VectorClock {
     }
 
     public void updateClock(VectorClock other) {
+        // update clock with the incoming clock value
         for (int i = 0; i < timestamps.length; i++) {
             timestamps[i] = Math.max(timestamps[i], other.timestamps[i]);
         }
+    }
+
+    public int getSize() {
+        return timestamps.length; // Returns the size of the vector clock
     }
 
     public String showClock() {

@@ -7,7 +7,6 @@ Assignment 4
 
 ...
 
-
 # Task 4
 
 > 1. What is the causal consistency? Explain it using the happened-before relation.
@@ -46,6 +45,11 @@ Standard vector clocks have a fixed size based on the number of processes. This 
 
 The dynamic vector clocks proposed by Tobias Landes aim to address these challenges. 
 Dynamic vector clocks can grow or shrink in size as processes join or leave the system. This means that they need to update knowledge about other processes and including new processes it was previously unaware of. 
-Dynamic vector clocks use a two -column matrix. One column represents the process IDs, and the other represents the corresponding clock values. They can implement a garbage collection mechanism to remove entries for terminated processes, keeping the clock size in check.
+Dynamic vector clocks use a two-column matrix. One column represents the process IDs, and the other represents the corresponding clock values. They can implement a garbage collection mechanism to remove entries for terminated processes, keeping the clock size in check.
 
 We have found this solution on the paper proposed on the assignment sheet. 
+
+Sources for these Answers: 
+
+https://www.geeksforgeeks.org/causal-consistency-model-in-system-design/
+https://www.geeksforgeeks.org/vector-clocks-in-distributed-systems/

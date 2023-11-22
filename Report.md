@@ -2,10 +2,12 @@ Assignment 4
 ------------
 
 # Team Members
+- Emma Kozmér
+- Luisa Ella Müller
 
 # GitHub link to your (forked) repository (if submitting through GitHub)
 
-...
+https://github.com/luisaellamaria/Assignment4.git
 
 # Task 4
 
